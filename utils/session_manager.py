@@ -1,19 +1,20 @@
 from datetime import datetime
 from display_view import View
-from photo_edit import fill_template, crop_photo
+from photo_edit import fill_template, crop_photo, double_join, clear_cache
 from os import rename, mkdir
 from os import path as os_path
+from printer_usage import print_file
 
 
 class Session:
 
-    def __init__(self, vid_source:str|int, save_path:str='./saved'):
+    def __init__(self, vid_source:str|int, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440)):
 
         self.framerate = 30
         self.state = 'idle'
         self.last_step_start_time = 0
         self.freezed_frame = None
-        self.view = View(vid_source)
+        self.view = View(vid_source, resolution)
 
         # validate the save path
         if not os_path.exists(save_path):
@@ -23,16 +24,12 @@ class Session:
             if not os_path.exists('./saved'):
                 mkdir('./saved')
         else:
-            self.save_path = save_path
-
-        #settings
-        self.window_name = 'Photo Booth'
-    
+            self.save_path = save_path    
 
     # function for state update
     def update_state(self, state:str):
-        
-        allowed_states = ['idle','photo.1','photo.2','photo.3','printing']
+
+        allowed_states = ['idle','photo.1','photo.2','photo.3','compiling','printing','printing.active','await']
         if not state in allowed_states:
             print('Session: unhandled state: ' + state)
             return
@@ -41,7 +38,7 @@ class Session:
         if state == 'idle':
             self.framerate = 50
         elif self.state == 'idle':
-            self.framerate = 25
+            self.framerate = 50
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -77,6 +74,9 @@ class Session:
             ['./_cache/crop1.jpg','./_cache/crop2.jpg','./_cache/crop3.jpg'], 
             template_url
             )
+        
+        double_join('./_cache/ready.jpg')
+
 
 
     # manage taking photos and the countdown
@@ -90,12 +90,11 @@ class Session:
             current_photo_num = int(self.state.split('.')[1])
 
             if current_photo_num == 3:
-                self.update_state('printing')
-                self.view.place_text('printing...')
-                return
+                self.update_state('compiling')
+            else:
+                self.update_state('photo.' + str(int(self.state.split('.')[1])+1))
+            return
 
-            self.update_state('photo.' + str(int(self.state.split('.')[1])+1))
-        
         if seconds_passed > 6:
             self.freezed_frame = None
             return 
@@ -127,15 +126,40 @@ class Session:
 
         #idle
         if self.state == 'idle':
-            self.view.place_text('Naciśnij spację')
+            self.view.place_text('Naciśnij spację', r_pos=(0,-0.15))
+            self.view.place_text('aby rozpocząć sesję', r_pos=(0,0.15), font_scale=80)
             return
         
         elif self.state.split('.')[0] == 'photo':
             self.photo_taker()
         
-        elif self.state == 'printing':
+        elif self.state == 'compiling':
             self.put_together()
+            if os_path.exists('./_cache/ready.jpg'):
+                self.update_state('printing')
+        
+        elif self.state.split('.')[0] == 'printing':
+            if self.state == 'printing':
+                print_file('./_cache/ready.jpg')
+            self.view.place_text('drukowanie...')
 
+            #check for print finish
+            if datetime.timestamp(datetime.now()) - self.last_step_start_time > 5:
+                self.update_state('await')
+        
+        elif self.state == 'await':
+
+            seconds_passed = int(datetime.timestamp(datetime.now()) - self.last_step_start_time)
+
+            self.view.place_text('kliknij spację',r_pos=(0,-0.15),font_scale=100)
+            self.view.place_text('aby wydrukwoać kolejną kopię',r_pos=(0,0.1),font_scale=80)
+            self.view.place_text(str(5 - seconds_passed),r_pos=(0,0.30),font_scale=60)
+
+            # end the loop
+            if seconds_passed >= 5:
+                print('clearing cache')
+                clear_cache()
+                self.update_state('idle')
 
 
     # main loop
@@ -158,7 +182,9 @@ class Session:
         elif key == ord(' '):
             if self.state == 'idle':
                 self.update_state('photo.1')
+            if self.state == 'await':
+                self.update_state('printing')
         
         #display
-        self.view.display(self.window_name)
+        self.view.display()
         self.render_view()

@@ -55,6 +55,7 @@ def fill_template(file_urls, template_url):
 
     try:
         with Image.open(template_url) as template:
+            template = template.convert('RGB')
             for i in range(max(3, len(file_urls))):
                     with Image.open(file_urls[i]) as img:
                         (cw,ch) = img.size
@@ -70,8 +71,22 @@ def fill_template(file_urls, template_url):
         raise Exception('failed to generate image')
 
 
+# double given image
+def double_join(file_path):
+    try:
+        with Image.open(file_path) as image:
+            (fw, fh) = image.size
+            blank = Image.new(mode="RGB", size=(int(2*fw),int(fh)))
+            blank.paste(image, (0,0))
+            blank.paste(image, (image.size[0],0))
+            blank.save(file_path)
+    except:
+        raise Exception('failed to join images')
+
+
 def clear_cache():
     try:
-        rmtree('./cache')
+        rmtree('./_cache')
+        os.mkdir('./_cache')
     except:
         raise Exception('failed to clear cache')

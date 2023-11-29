@@ -6,14 +6,21 @@ from os import path as os_path
 
 class View:
     
-    def __init__(self, vid_source:str|int):
+    def __init__(self, vid_source:str|int, resolution:tuple[int, int], name='Photo Booth'):
 
         self.vid = cv.VideoCapture(vid_source)
+        self.vid.set(cv.CAP_PROP_FRAME_WIDTH, resolution[0])
+        self.vid.set(cv.CAP_PROP_FRAME_HEIGHT, resolution[1])
+        print()
         self.font_path = os_path.join(sys_path[0],'assets','fonts','lato.ttf')
         self.dimensions = [self.vid.get(4), self.vid.get(3)]
+        self.name = name
 
         self.pressed_key = ''
         self.refresh(0)
+        
+        cv.namedWindow(self.name,cv.WINDOW_NORMAL)
+        cv.setWindowProperty(self.name, cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
     
 
     # place text on the frame
@@ -60,6 +67,6 @@ class View:
 
 
     # display the frame
-    def display(self, name:str):
+    def display(self):
 
-        cv.imshow(name, self.frame)
+        cv.imshow(self.name, self.frame)
