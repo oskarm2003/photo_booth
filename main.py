@@ -5,18 +5,24 @@ from os import path as os_path
 sys_path.append(os_path.join(sys_path[0],'utils'))
 
 from session_manager import Session
-from display_view import View
+from printer_usage import printer_selection
 
 
-video, resolution, save_path = 0, (2560,1440), './saved'
+video, resolution, save_path, printer_name = 0, (2560,1440), './saved', None
 
 # handle script parameters
 for arg in argv:
 
     if arg == '--help':
-        print('\t--video=[int or str] - specify the source of the video:\n\t\t0 - first system camera\n\t\t1 - secondary system camera\n\t\tstr - path to video file\n')
-        print('\t--resolution=[intxint] - specify the resolution of displayed video\n\t\texample: --resolution=320x180\n')
-        print('\t--save-path=[str] - specify the path to which the photos will be saved\n')
+        print('script parameters:')
+        print('\t--video=[int or str] - specify the source of the video:\n\t\t0 - first system camera\n\t\t1 - secondary system camera\n\t\tstr - path to video file')
+        print('\t--resolution=[intxint] - specify the resolution of displayed video\n\t\texample: --resolution=320x180')
+        print('\t--save-path=[str] - specify the path to which the photos will be saved')
+        print('\t--printer-name=[str] - specify the name of the printer that will print the photos')
+        print('\ncontrols:')
+        print('\tq - quit. Halt the script')
+        print('\tspace - response to session requests')
+        print('\ta - abort current action and return to idle state')
         exit()
     
     match arg.split('=')[0]:
@@ -28,9 +34,16 @@ for arg in argv:
             tmp = arg.split('='[1]).split('x')
             resolution = (tmp[0],tmp[1])
         
-        case '--save_path':
+        case '--save-path':
             save_path = arg.split('=')[1]
+
+        case '--printer-name':
+            printer_name = arg.split('=')[1]
         
-    
-session = Session(video, save_path, resolution)
+if printer_name is None:
+    print('\nno printer is selected, please choose one\n')
+    printer_name = printer_selection()
+
+print('\npress q to exit\nopening...')
+session = Session(video, printer_name=printer_name, save_path=save_path, resolution=resolution)
 session.render_view()

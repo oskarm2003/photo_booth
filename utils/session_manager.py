@@ -8,13 +8,14 @@ from printer_usage import print_file
 
 class Session:
 
-    def __init__(self, vid_source:str|int, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440)):
+    def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440)):
 
         self.framerate = 30
         self.state = 'idle'
         self.last_step_start_time = 0
         self.freezed_frame = None
         self.view = View(vid_source, resolution)
+        self.printer_name = printer_name
 
         # validate the save path
         if not os_path.exists(save_path):
@@ -36,9 +37,9 @@ class Session:
         
         # change framerate
         if state == 'idle':
-            self.framerate = 50
+            self.framerate = 30
         elif self.state == 'idle':
-            self.framerate = 50
+            self.framerate = 5
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -140,7 +141,8 @@ class Session:
         
         elif self.state.split('.')[0] == 'printing':
             if self.state == 'printing':
-                print_file('./_cache/ready.jpg')
+                print_file('./_cache/ready.jpg', self.printer_name)
+                self.update_state('printing.active')
             self.view.place_text('drukowanie...')
 
             #check for print finish
@@ -165,26 +167,30 @@ class Session:
     # main loop
     def render_view(self):
 
-        try:
-            self.view.refresh(self.framerate)
-        except:
-            print('could not get the view. exiting...')
-            return
+        while True:
+            try:
+                self.view.refresh(self.framerate)
+            except:
+                print('could not get the view. exiting...')
+                return
 
-        key = self.view.pressed_key
+            key = self.view.pressed_key
 
-        self.session_manager()
-        
-        if key == ord('q'):
-            print('user exit')
-            return
-        
-        elif key == ord(' '):
-            if self.state == 'idle':
-                self.update_state('photo.1')
-            if self.state == 'await':
-                self.update_state('printing')
-        
-        #display
-        self.view.display()
-        self.render_view()
+            self.session_manager()
+            
+            if key == ord('q'):
+                print('user exit')
+                return
+            
+            elif key == ord('a'):
+                if not self.state == 'idle':
+                    self.update_state('idle')
+            
+            elif key == ord(' '):
+                if self.state == 'idle':
+                    self.update_state('photo.1')
+                if self.state == 'await':
+                    self.update_state('printing')
+            
+            #display
+            self.view.display()

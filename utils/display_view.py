@@ -9,6 +9,8 @@ class View:
     def __init__(self, vid_source:str|int, resolution:tuple[int, int], name='Photo Booth'):
 
         self.vid = cv.VideoCapture(vid_source)
+
+        self.resolution = resolution
         self.vid.set(cv.CAP_PROP_FRAME_WIDTH, resolution[0])
         self.vid.set(cv.CAP_PROP_FRAME_HEIGHT, resolution[1])
         print()
@@ -30,10 +32,11 @@ class View:
 
         font = ImageFont.truetype(self.font_path, font_scale)
         pil_img = Image.fromarray(self.frame)
+        pil_img = pil_img.resize(self.resolution)
         draw = ImageDraw.Draw(pil_img)
         text_len = draw.textlength(text,font)
         draw.text(
-            (int((self.dimensions[1] - text_len)//2 * (1 + r_pos[0])),int((self.dimensions[0] - font_scale)//2 * (1 + r_pos[1]))),
+            (int((self.resolution[0] - text_len)//2 * (1 + r_pos[0])),int((self.resolution[1] - font_scale)//2 * (1 + r_pos[1]))),
             text,
             font=font
         )
