@@ -10,7 +10,7 @@ class Session:
 
     def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440)):
 
-        self.framerate = 30
+        self.frame_refresh_delay = 30
         self.state = 'idle'
         self.last_step_start_time = 0
         self.freezed_frame = None
@@ -30,16 +30,16 @@ class Session:
     # function for state update
     def update_state(self, state:str):
 
-        allowed_states = ['idle','photo.1','photo.2','photo.3','compiling','printing','printing.active','await']
+        allowed_states = ['idle','photo.1','photo.2','photo.3','compiling','printing','printing.active','await_answer','delay']
         if not state in allowed_states:
             print('Session: unhandled state: ' + state)
             return
         
-        # change framerate
+        # change frame_time_gap
         if state == 'idle':
-            self.framerate = 30
+            self.frame_time_gap = 30
         elif self.state == 'idle':
-            self.framerate = 5
+            self.frame_time_gap = 5
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -147,9 +147,10 @@ class Session:
 
             #check for print finish
             if datetime.timestamp(datetime.now()) - self.last_step_start_time > 5:
-                self.update_state('await')
+                self.update_state('await_answer')
         
-        elif self.state == 'await':
+        # wait for user answer
+        elif self.state == 'await_answer':
 
             seconds_passed = int(datetime.timestamp(datetime.now()) - self.last_step_start_time)
 
@@ -161,15 +162,20 @@ class Session:
             if seconds_passed >= 5:
                 print('clearing cache')
                 clear_cache()
-                self.update_state('idle')
+                self.update_state('delay')
+        
+        # delay between potential sessions
+        elif self.state == 'delay' and int(datetime.timestamp(datetime.now()) - self.last_step_start_time) >= 2:
+            self.update_state('idle')
 
 
     # main loop
     def render_view(self):
 
         while True:
+            # print(self.frame_time_gap)
             try:
-                self.view.refresh(self.framerate)
+                self.view.refresh(self.frame_time_gap)
             except:
                 print('could not get the view. exiting...')
                 return
