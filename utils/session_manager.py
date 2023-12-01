@@ -175,7 +175,7 @@ class Session:
         while True:
             # print(self.frame_time_gap)
             try:
-                self.view.refresh(self.frame_time_gap)
+                self.view.refresh(self.frame_refresh_delay)
             except:
                 print('could not get the view. exiting...')
                 return

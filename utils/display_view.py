@@ -13,7 +13,6 @@ class View:
         self.resolution = resolution
         self.vid.set(cv.CAP_PROP_FRAME_WIDTH, resolution[0])
         self.vid.set(cv.CAP_PROP_FRAME_HEIGHT, resolution[1])
-        print()
         self.font_path = os_path.join(sys_path[0],'assets','fonts','lato.ttf')
         self.dimensions = [self.vid.get(4), self.vid.get(3)]
         self.name = name
@@ -62,6 +61,7 @@ class View:
     def refresh(self, delay:int):
 
         ret, self.frame = self.vid.read()
+        # print(ret, self.frame)
 
         if not ret:
             raise Exception('Frame: could not get the view')
