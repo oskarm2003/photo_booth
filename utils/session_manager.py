@@ -39,7 +39,7 @@ class Session:
         if state == 'idle':
             self.frame_time_gap = 30
         elif self.state == 'idle':
-            self.frame_time_gap = 5
+            self.frame_time_gap = 1
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -195,7 +195,7 @@ class Session:
             elif key == ord(' '):
                 if self.state == 'idle':
                     self.update_state('photo.1')
-                if self.state == 'await':
+                if self.state == 'await_answer':
                     self.update_state('printing')
             
             #display

@@ -31,8 +31,9 @@ for arg in argv:
             video = arg.split('=')[1]
         
         case '--resolution':
-            tmp = arg.split('='[1]).split('x')
-            resolution = (tmp[0],tmp[1])
+            tmp = arg.split('=')[1].split('x')
+            resolution = (int(tmp[0]),int(tmp[1]))
+            print(resolution)
         
         case '--save-path':
             save_path = arg.split('=')[1]

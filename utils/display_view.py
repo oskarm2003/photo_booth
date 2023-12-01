@@ -36,6 +36,7 @@ class View:
         text_len = draw.textlength(text,font)
         draw.text(
             (int((self.resolution[0] - text_len)//2 * (1 + r_pos[0])),int((self.resolution[1] - font_scale)//2 * (1 + r_pos[1]))),
+            # (int((self.dimensions[1] - text_len)//2 * (1 + r_pos[0])),int((self.dimensions[0] - font_scale)//2 * (1 + r_pos[1]))),
             text,
             font=font
         )
