@@ -84,6 +84,11 @@ def double_join(file_path):
         raise Exception('failed to join images')
 
 
+def display_image(path):
+    img = Image.open(path)
+    img.show()
+
+
 def clear_cache():
     try:
         rmtree('./_cache')

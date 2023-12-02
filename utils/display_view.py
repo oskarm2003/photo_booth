@@ -6,7 +6,7 @@ from os import path as os_path
 
 class View:
     
-    def __init__(self, vid_source:str|int, resolution:tuple[int, int], name='Photo Booth'):
+    def __init__(self, vid_source:str|int, resolution:tuple[int, int], fullscreen:bool, name='Photo Booth'):
 
         self.vid = cv.VideoCapture(vid_source)
 
@@ -20,8 +20,9 @@ class View:
         self.pressed_key = ''
         self.refresh(0)
         
-        cv.namedWindow(self.name,cv.WINDOW_NORMAL)
-        cv.setWindowProperty(self.name, cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
+        if fullscreen:
+            cv.namedWindow(self.name,cv.WINDOW_NORMAL)
+            cv.setWindowProperty(self.name, cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN)
     
 
     # place text on the frame
@@ -30,8 +31,7 @@ class View:
         
 
         font = ImageFont.truetype(self.font_path, font_scale)
-        resized = cv.resize(self.frame, self.resolution)
-        pil_img = Image.fromarray(resized)
+        pil_img = Image.fromarray(self.frame)
         # pil_img = pil_img.resize(self.resolution)
         draw = ImageDraw.Draw(pil_img)
         text_len = draw.textlength(text,font)
@@ -63,11 +63,11 @@ class View:
     def refresh(self, delay:int):
 
         ret, self.frame = self.vid.read()
-        # print(ret, self.frame)
 
         if not ret:
             raise Exception('Frame: could not get the view')
         
+        self.frame = cv.resize(self.frame, self.resolution)
         self.pressed_key = cv.waitKey(delay)
 
 

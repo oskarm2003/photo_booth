@@ -1,6 +1,6 @@
 from datetime import datetime
 from display_view import View
-from photo_edit import fill_template, crop_photo, double_join, clear_cache
+from photo_edit import fill_template, crop_photo, double_join, clear_cache, display_image
 from os import rename, mkdir
 from os import path as os_path
 from printer_usage import print_file
@@ -8,13 +8,13 @@ from printer_usage import print_file
 
 class Session:
 
-    def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440)):
+    def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440), fullscreen=True):
 
         self.frame_refresh_delay = 30
         self.state = 'idle'
         self.last_step_start_time = 0
         self.freezed_frame = None
-        self.view = View(vid_source, resolution)
+        self.view = View(vid_source, resolution, fullscreen)
         self.printer_name = printer_name
 
         # validate the save path
@@ -39,8 +39,7 @@ class Session:
         if state == 'idle':
             self.frame_refresh_delay = 30
         elif self.state == 'idle':
-            print('change framerate')
-            self.frame_refresh_delay = 5
+            self.frame_refresh_delay = 30
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -57,6 +56,7 @@ class Session:
 
         # if os_path.exists(path):
             # crop_photo(path, 'ready'+self.state.split('.')[1])
+        # print('flash')
         self.view.flash_filter()
     
 
@@ -101,12 +101,12 @@ class Session:
             self.freezed_frame = None
             return 
         
-        if seconds_passed >= 4.35:
+        if seconds_passed >= 4.4:
             if not self.freezed_frame is None:
                 self.view.frame = self.freezed_frame
             return
 
-        if 4.25 <= seconds_passed < 4.35:
+        if 4.25 <= seconds_passed < 4.4:
             self.take_photo()
         
         # place text with progress in the corner
@@ -118,6 +118,7 @@ class Session:
 
         elif seconds_passed >= 2:
             self.view.place_text('2')
+
 
         elif seconds_passed >= 1:
             self.view.place_text('3')
@@ -162,8 +163,9 @@ class Session:
             # end the loop
             if seconds_passed >= 5:
                 print('clearing cache')
-                clear_cache()
                 self.update_state('delay')
+                display_image('./_cache/ready.jpg')
+                clear_cache()
         
         # delay between potential sessions
         elif self.state == 'delay' and int(datetime.timestamp(datetime.now()) - self.last_step_start_time) >= 2:
@@ -174,7 +176,6 @@ class Session:
     def render_view(self):
 
         while True:
-            # print(self.frame_refresh_delay)
             try:
                 self.view.refresh(self.frame_refresh_delay)
             except:

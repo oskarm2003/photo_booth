@@ -8,7 +8,11 @@ from session_manager import Session
 from printer_usage import printer_selection
 
 
-video, resolution, save_path, printer_name = 0, (2560,1440), './saved', None
+video = 0
+resolution = (2560,1440)
+save_path = './saved'
+printer_name = None
+fullscreen = True
 
 # handle script parameters
 for arg in argv:
@@ -19,6 +23,7 @@ for arg in argv:
         print('\t--resolution=[intxint] - specify the resolution of displayed video\n\t\texample: --resolution=320x180')
         print('\t--save-path=[str] - specify the path to which the photos will be saved')
         print('\t--printer-name=[str] - specify the name of the printer that will print the photos')
+        print("\t--no-fullscreen - don't display the view in fullscreen mode")
         print('\ncontrols:')
         print('\tq - quit. Halt the script')
         print('\tspace - response to session requests')
@@ -41,10 +46,14 @@ for arg in argv:
         case '--printer-name':
             printer_name = arg.split('=')[1]
         
+        case '--no-fullscreen':
+            fullscreen = False
+
+
 if printer_name is None:
     print('\nno printer is selected, please choose one\n')
     printer_name = printer_selection()
 
 print('\npress q to exit\nopening...')
-session = Session(video, printer_name=printer_name, save_path=save_path, resolution=resolution)
+session = Session(video, printer_name=printer_name, save_path=save_path, resolution=resolution, fullscreen=fullscreen)
 session.render_view()
