@@ -30,8 +30,9 @@ class View:
         
 
         font = ImageFont.truetype(self.font_path, font_scale)
-        pil_img = Image.fromarray(self.frame)
-        pil_img = pil_img.resize(self.resolution)
+        resized = cv.resize(self.frame, self.resolution)
+        pil_img = Image.fromarray(resized)
+        # pil_img = pil_img.resize(self.resolution)
         draw = ImageDraw.Draw(pil_img)
         text_len = draw.textlength(text,font)
         draw.text(

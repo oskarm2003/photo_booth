@@ -37,9 +37,10 @@ class Session:
         
         # change frame_time_gap
         if state == 'idle':
-            self.frame_time_gap = 30
+            self.frame_refresh_delay = 30
         elif self.state == 'idle':
-            self.frame_time_gap = 1
+            print('change framerate')
+            self.frame_refresh_delay = 5
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -173,7 +174,7 @@ class Session:
     def render_view(self):
 
         while True:
-            # print(self.frame_time_gap)
+            # print(self.frame_refresh_delay)
             try:
                 self.view.refresh(self.frame_refresh_delay)
             except:
