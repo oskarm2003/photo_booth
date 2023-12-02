@@ -16,6 +16,7 @@ resolution = (user32.GetSystemMetrics(0), user32.GetSystemMetrics(1))
 save_path = './saved'
 printer_name = None
 fullscreen = True
+frame_delay = 5
 
 # handle script parameters
 for arg in argv:
@@ -26,6 +27,7 @@ for arg in argv:
         print('\t--resolution=[intxint] - specify the resolution of displayed video\n\t\texample: --resolution=320x180')
         print('\t--save-path=[str] - specify the path to which the photos will be saved')
         print('\t--printer-name=[str] - specify the name of the printer that will print the photos')
+        print('\t--frame-delay=int - number of miliseconds awaited between frames during session')
         print("\t--no-fullscreen - don't display the view in fullscreen mode")
         print('\ncontrols:')
         print('\tq - quit. Halt the script')
@@ -52,11 +54,14 @@ for arg in argv:
         case '--no-fullscreen':
             fullscreen = False
 
+        case '--frame-delay':
+            frame_delay = arg.split('=')[1]
+
 
 if printer_name is None:
     print('\nno printer is selected, please choose one\n')
     printer_name = printer_selection()
 
 print('\npress q to exit\nopening...')
-session = Session(video, printer_name=printer_name, save_path=save_path, resolution=resolution, fullscreen=fullscreen)
+session = Session(video, printer_name=printer_name, save_path=save_path, resolution=resolution, fullscreen=fullscreen, target_frame_delay=frame_delay)
 session.render_view()

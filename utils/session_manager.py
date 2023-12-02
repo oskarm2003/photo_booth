@@ -3,12 +3,13 @@ from display_view import View
 from photo_edit import fill_template, crop_photo, double_join, clear_cache, display_image
 from os import rename, mkdir
 from os import path as os_path
+from shutil import copyfile
 from printer_usage import print_file
 
 
 class Session:
 
-    def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440), fullscreen=True):
+    def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440), fullscreen=True, target_frame_delay=5):
 
         self.frame_refresh_delay = 30
         self.state = 'idle'
@@ -16,6 +17,7 @@ class Session:
         self.freezed_frame = None
         self.view = View(vid_source, resolution, fullscreen)
         self.printer_name = printer_name
+        self.target_frame_delay = int(target_frame_delay)
 
         # validate the save path
         if not os_path.exists(save_path):
@@ -39,7 +41,7 @@ class Session:
         if state == 'idle':
             self.frame_refresh_delay = 30
         elif self.state == 'idle':
-            self.frame_refresh_delay = 1
+            self.frame_refresh_delay = self.target_frame_delay
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -76,6 +78,7 @@ class Session:
             template_url
             )
         
+        copyfile('./_cache/ready.jpg', self.save_path+'/ready '+str(datetime.now()).split('.')[0].replace(':','-')+'.jpg')
         double_join('./_cache/ready.jpg')
 
 
@@ -156,7 +159,7 @@ class Session:
             seconds_passed = int(datetime.timestamp(datetime.now()) - self.last_step_start_time)
 
             self.view.place_text('kliknij spację',r_pos=(0,-0.15),font_scale=100)
-            self.view.place_text('aby wydrukwoać kolejną kopię',r_pos=(0,0.1),font_scale=80)
+            self.view.place_text('aby wydrukować kolejną kopię',r_pos=(0,0.1),font_scale=80)
             self.view.place_text(str(5 - seconds_passed),r_pos=(0,0.30),font_scale=60)
 
             # end the loop
