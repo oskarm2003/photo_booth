@@ -1,4 +1,4 @@
 .vscode
-_cache
+_cache/*
 saved
 utils/__pycache__
