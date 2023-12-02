@@ -39,7 +39,7 @@ class Session:
         if state == 'idle':
             self.frame_refresh_delay = 30
         elif self.state == 'idle':
-            self.frame_refresh_delay = 30
+            self.frame_refresh_delay = 1
 
         self.state = state
         self.last_step_start_time = datetime.timestamp(datetime.now())
@@ -56,7 +56,6 @@ class Session:
 
         # if os_path.exists(path):
             # crop_photo(path, 'ready'+self.state.split('.')[1])
-        # print('flash')
         self.view.flash_filter()
     
 
@@ -164,7 +163,7 @@ class Session:
             if seconds_passed >= 5:
                 print('clearing cache')
                 self.update_state('delay')
-                display_image('./_cache/ready.jpg')
+                # display_image('./_cache/ready.jpg')
                 clear_cache()
         
         # delay between potential sessions
@@ -192,6 +191,7 @@ class Session:
             
             elif key == ord('a'):
                 if not self.state == 'idle':
+                    clear_cache()
                     self.update_state('idle')
             
             elif key == ord(' '):

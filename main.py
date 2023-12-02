@@ -1,15 +1,18 @@
 from sys import path as sys_path
 from sys import argv
 from os import path as os_path
+from ctypes import windll
 
 sys_path.append(os_path.join(sys_path[0],'utils'))
 
 from session_manager import Session
 from printer_usage import printer_selection
 
+user32 = windll.user32
+user32.SetProcessDPIAware()
 
 video = 0
-resolution = (2560,1440)
+resolution = (user32.GetSystemMetrics(0), user32.GetSystemMetrics(1))
 save_path = './saved'
 printer_name = None
 fullscreen = True
