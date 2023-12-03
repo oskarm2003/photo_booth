@@ -2,6 +2,7 @@ from sys import path as sys_path
 from sys import argv
 from os import path as os_path
 from ctypes import windll
+from os import mkdir
 
 sys_path.append(os_path.join(sys_path[0],'utils'))
 
@@ -17,6 +18,9 @@ save_path = './saved'
 printer_name = None
 fullscreen = True
 frame_delay = 5
+
+if not os_path.exists('./_cache'):
+    mkdir('./_cache')
 
 # handle script parameters
 for arg in argv:
