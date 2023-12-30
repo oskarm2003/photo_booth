@@ -33,7 +33,8 @@ def print_file(relative_filepath, printer_name):
         print(cmd)
         subprocess.run(cmd, shell=True)
 
-    
+
+# currently not used anywhere
 def printer_selection():
 
     os_name = system()

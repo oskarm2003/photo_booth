@@ -3,7 +3,7 @@ import os
 from shutil import rmtree
 
 
-def crop_photo(url, new_name=""):
+def crop_photo(url, new_name="", height=400):
     
     try:
         with Image.open(url) as img:
@@ -11,7 +11,7 @@ def crop_photo(url, new_name=""):
             (_, ext) = os.path.splitext(url)
 
             # crop first to avoid image stretch
-            (fw,fh) = img.size #file w h
+            fw,fh = img.size #file w h
             current_ratio = fw/fh
             
             # desired ratio: 1 : 1.2 <=> fw = 1.2*fh
@@ -27,7 +27,7 @@ def crop_photo(url, new_name=""):
             modified = img.crop(((fw-dw)//2,(fh-dh)//2,(fw+dw)//2,(fh+dh)//2))
             
             # resize
-            height = 400
+            # height = 400
             modified = modified.resize((int(height * d_ratio), height))
 
             # change name
@@ -48,7 +48,7 @@ def crop_photo(url, new_name=""):
 # input: 
 #   file_urls - list of urls, ex: [1.jpg,2.jpg,3.jpg]; 
 #   template_url - url of the template, ex: './templates/stars.png'
-def fill_template(file_urls, template_url):
+def fill_template(file_urls, template_url, output_height=None):
     
     if not hasattr(file_urls, "__len__" or issubclass(type(file_urls),str)):
         raise Exception('file_urls is not a list')
@@ -56,6 +56,10 @@ def fill_template(file_urls, template_url):
     try:
         with Image.open(template_url) as template:
             template = template.convert('RGB')
+            if not output_height == None: 
+                w,h = template.size
+                ratio = w/h
+                template = template.resize((int(ratio * output_height), output_height))
             for i in range(max(3, len(file_urls))):
                     with Image.open(file_urls[i]) as img:
                         (cw,ch) = img.size
@@ -72,13 +76,19 @@ def fill_template(file_urls, template_url):
 
 
 # double given image
-def double_join(file_path):
+def double_join(file_path, rotate=False):
     try:
         with Image.open(file_path) as image:
             (fw, fh) = image.size
             blank = Image.new(mode="RGB", size=(int(2*fw),int(fh)))
             blank.paste(image, (0,0))
             blank.paste(image, (image.size[0],0))
+
+            print(rotate)
+            if rotate:
+                print('rotates')
+                blank = blank.rotate(90, expand=1)
+
             blank.save(file_path)
     except:
         raise Exception('failed to join images')

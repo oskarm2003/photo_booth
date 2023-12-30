@@ -9,15 +9,17 @@ from printer_usage import print_file
 
 class Session:
 
-    def __init__(self, vid_source:str|int, printer_name:str, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440), fullscreen=True, target_frame_delay=5):
+    def __init__(self, vid_source:str|int, printer_name:str, rotate_output=False, output_file_height=None, save_path:str='./saved', resolution:tuple[int,int]=(2560,1440), fullscreen=True, target_frame_delay=5):
 
         self.frame_refresh_delay = 30
         self.state = 'idle'
         self.last_step_start_time = 0
         self.freezed_frame = None
+        self.output_file_height = output_file_height
         self.view = View(vid_source, resolution, fullscreen)
         self.printer_name = printer_name
         self.target_frame_delay = int(target_frame_delay)
+        self.rotate_output = rotate_output
 
         # validate the save path
         if not os_path.exists(save_path):
@@ -53,7 +55,11 @@ class Session:
         if self.freezed_frame is None:
             self.freezed_frame = self.view.frame.copy()
             self.view.save_frame(path)
-            crop_photo(path, 'crop'+self.state.split('.')[1])
+            photo_height = None
+            if self.output_file_height != None:
+                crop_photo(path, 'crop'+self.state.split('.')[1], height = self.output_file_height // 5)
+            else:
+                crop_photo(path, 'crop'+self.state.split('.')[1])
             rename(path,self.save_path+'/'+str(datetime.now()).split('.')[0].replace(':','-')+'.jpg')
 
         # if os_path.exists(path):
@@ -75,11 +81,12 @@ class Session:
         
         fill_template(
             ['./_cache/crop1.jpg','./_cache/crop2.jpg','./_cache/crop3.jpg'], 
-            template_url
+            template_url,
+            output_height=self.output_file_height
             )
         
-        # copyfile('./_cache/ready.jpg', self.save_path+'/ready '+str(datetime.now()).split('.')[0].replace(':','-')+'.jpg')
-        double_join('./_cache/ready.jpg')
+        double_join('./_cache/ready.jpg', rotate=self.rotate_output)
+        copyfile('./_cache/ready.jpg', self.save_path+'/ready '+str(datetime.now()).split('.')[0].replace(':','-')+'.jpg')
 
 
 
@@ -89,7 +96,7 @@ class Session:
         seconds_passed = datetime.timestamp(datetime.now()) - self.last_step_start_time
 
         # move on
-        if seconds_passed >= 10:
+        if seconds_passed >= 6.5:
 
             current_photo_num = int(self.state.split('.')[1])
 
