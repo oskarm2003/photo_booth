@@ -27,8 +27,10 @@ def print_file(relative_filepath, printer_name):
     
     # print on Windows
     elif os_name == 'Windows':
-        0
-        cmd = f'print /d:\\\\%COMPUTERNAME%\\"{printer_name}" {filepath}'
+        # cmd = f'print /d:\\\\%COMPUTERNAME%\\"{printer_name}" {filepath}'
+        cmd = f'mspaint /pt {filepath}'
+
+        print(cmd)
         subprocess.run(cmd, shell=True)
 
     

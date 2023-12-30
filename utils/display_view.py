@@ -9,6 +9,7 @@ class View:
     def __init__(self, vid_source:str|int, resolution:tuple[int, int], fullscreen:bool, name='Photo Booth'):
 
         self.vid = cv.VideoCapture(vid_source)
+        self.vid_source = vid_source
 
         self.resolution = resolution
         self.vid.set(cv.CAP_PROP_FRAME_WIDTH, resolution[0])
@@ -65,7 +66,10 @@ class View:
         ret, self.frame = self.vid.read()
 
         if not ret:
-            raise Exception('Frame: could not get the view')
+            # raise Exception('Frame: could not get the view')
+            self.vid.release()
+            self.vid = cv.VideoCapture(self.vid_source)
+            ret, self.frame = self.vid.read()
         
         self.frame = cv.resize(self.frame, self.resolution)
         self.pressed_key = cv.waitKey(delay)

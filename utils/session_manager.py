@@ -78,7 +78,7 @@ class Session:
             template_url
             )
         
-        copyfile('./_cache/ready.jpg', self.save_path+'/ready '+str(datetime.now()).split('.')[0].replace(':','-')+'.jpg')
+        # copyfile('./_cache/ready.jpg', self.save_path+'/ready '+str(datetime.now()).split('.')[0].replace(':','-')+'.jpg')
         double_join('./_cache/ready.jpg')
 
 
@@ -89,7 +89,7 @@ class Session:
         seconds_passed = datetime.timestamp(datetime.now()) - self.last_step_start_time
 
         # move on
-        if seconds_passed >= 7:
+        if seconds_passed >= 10:
 
             current_photo_num = int(self.state.split('.')[1])
 
@@ -144,13 +144,13 @@ class Session:
                 self.update_state('printing')
         
         elif self.state.split('.')[0] == 'printing':
+            self.view.place_text('drukowanie...')
             if self.state == 'printing':
                 print_file('./_cache/ready.jpg', self.printer_name)
                 self.update_state('printing.active')
-            self.view.place_text('drukowanie...')
 
             #check for print finish
-            if datetime.timestamp(datetime.now()) - self.last_step_start_time > 5:
+            if datetime.timestamp(datetime.now()) - self.last_step_start_time > 30:
                 self.update_state('await_answer')
         
         # wait for user answer
